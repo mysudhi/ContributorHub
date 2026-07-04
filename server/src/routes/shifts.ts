@@ -222,3 +222,118 @@ shiftsRouter.delete("/:id/contributors/:userId", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+shiftsRouter.post("/:id/signup", async (req, res) => {
+  try {
+    const userId = req.user!.userId;
+    const shift = await prisma.shift.findFirst({
+      where: { id: req.params.id, deletedAt: null },
+      include: { contributorLinks: true }
+    });
+
+    if (!shift) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    if (shift.status !== "OPEN") {
+      res.status(409).json({ error: "Shift is not open for signups" });
+      return;
+    }
+
+    const alreadySignedUp = shift.contributorLinks.some((l) => l.userId === userId);
+    if (alreadySignedUp) {
+      res.status(409).json({ error: "You are already signed up for this shift" });
+      return;
+    }
+
+    if (shift.contributorLinks.length >= shift.capacity) {
+      res.status(409).json({ error: "Shift is at full capacity" });
+      return;
+    }
+
+    const link = await prisma.shiftContributor.create({
+      data: { shiftId: req.params.id, userId },
+      include: { contributor: { select: { id: true, firstName: true, lastName: true, email: true } } }
+    });
+
+    const updatedCount = shift.contributorLinks.length + 1;
+    if (updatedCount >= shift.capacity) {
+      await prisma.shift.update({
+        where: { id: req.params.id },
+        data: { status: "FILLED" }
+      });
+    }
+
+    res.status(201).json({ signup: link });
+  } catch (err) {
+    console.error("Self-signup error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+shiftsRouter.delete("/:id/signup", async (req, res) => {
+  try {
+    const userId = req.user!.userId;
+    const shift = await prisma.shift.findFirst({
+      where: { id: req.params.id, deletedAt: null },
+      include: { contributorLinks: true }
+    });
+
+    if (!shift) {
+      res.status(404).json({ error: "Shift not found" });
+      return;
+    }
+
+    const existing = shift.contributorLinks.find((l) => l.userId === userId);
+    if (!existing) {
+      res.status(404).json({ error: "You are not signed up for this shift" });
+      return;
+    }
+
+    await prisma.shiftContributor.delete({
+      where: { shiftId_userId: { shiftId: req.params.id, userId } }
+    });
+
+    if (shift.status === "FILLED") {
+      await prisma.shift.update({
+        where: { id: req.params.id },
+        data: { status: "OPEN" }
+      });
+    }
+
+    res.status(204).send();
+  } catch (err) {
+    console.error("Cancel signup error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+shiftsRouter.get("/my/signups", async (req, res) => {
+  try {
+    const userId = req.user!.userId;
+    const assignments = await prisma.shiftContributor.findMany({
+      where: { userId },
+      include: {
+        shift: {
+          include: {
+            tasks: { where: { deletedAt: null, assignedContributorId: userId }, select: { id: true, title: true, status: true } },
+            contributorLinks: {
+              include: { contributor: { select: { id: true, firstName: true, lastName: true } } }
+            }
+          }
+        }
+      },
+      orderBy: { shift: { startsAt: "asc" } }
+    });
+
+    const shifts = assignments
+      .map((a) => a.shift)
+      .filter((s) => !s.deletedAt);
+
+    res.json({ shifts });
+  } catch (err) {
+    console.error("My signups error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
