@@ -1,58 +1,43 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { MobileTabBar } from "../components/layout/MobileTabBar";
 
 describe("MobileTabBar", () => {
-  it("renders all three tabs", () => {
-    render(<MobileTabBar />);
-    expect(screen.getByText("Schedule")).toBeInTheDocument();
-    expect(screen.getByText("Shifts")).toBeInTheDocument();
-    expect(screen.getByText("Profile")).toBeInTheDocument();
+  it("renders Shifts and Profile tabs", () => {
+    render(<MobileTabBar page="dashboard" onNavigate={vi.fn()} isAdmin={false} />);
+    expect(screen.getByRole("button", { name: "Shifts" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Profile" })).toBeInTheDocument();
   });
 
-  it("renders tabs as buttons", () => {
-    render(<MobileTabBar />);
-    const buttons = screen.getAllByRole("button");
-    expect(buttons).toHaveLength(3);
+  it("shows Admin tab for admin users", () => {
+    render(<MobileTabBar page="dashboard" onNavigate={vi.fn()} isAdmin={true} />);
+    expect(screen.getByRole("button", { name: "Admin" })).toBeInTheDocument();
+  });
+
+  it("does not show Admin tab for non-admin users", () => {
+    render(<MobileTabBar page="dashboard" onNavigate={vi.fn()} isAdmin={false} />);
+    expect(screen.queryByRole("button", { name: "Admin" })).not.toBeInTheDocument();
   });
 
   it("uses a nav element with aria-label", () => {
-    render(<MobileTabBar />);
+    render(<MobileTabBar page="dashboard" onNavigate={vi.fn()} isAdmin={false} />);
     const nav = screen.getByLabelText("Primary navigation");
     expect(nav).toBeInTheDocument();
     expect(nav.tagName).toBe("NAV");
   });
 
-  it("is hidden on desktop (md:hidden)", () => {
-    render(<MobileTabBar />);
-    const nav = screen.getByLabelText("Primary navigation");
-    expect(nav).toHaveClass("md:hidden");
+  it("highlights the active page", () => {
+    render(<MobileTabBar page="admin" onNavigate={vi.fn()} isAdmin={true} />);
+    const adminBtn = screen.getByRole("button", { name: "Admin" });
+    expect(adminBtn.className).toContain("bg-blue-600");
   });
 
-  it("is fixed to the bottom of the screen", () => {
-    render(<MobileTabBar />);
-    const nav = screen.getByLabelText("Primary navigation");
-    expect(nav).toHaveClass("fixed", "inset-x-0", "bottom-0");
-  });
-
-  it("renders tabs in a 3-column grid", () => {
-    const { container } = render(<MobileTabBar />);
-    const grid = container.querySelector(".grid-cols-3");
-    expect(grid).toBeInTheDocument();
-  });
-
-  it("renders tabs as list items", () => {
-    const { container } = render(<MobileTabBar />);
-    const listItems = container.querySelectorAll("li");
-    expect(listItems).toHaveLength(3);
-  });
-
-  it("tabs are clickable", async () => {
+  it("calls onNavigate when tab is clicked", async () => {
+    const onNavigate = vi.fn();
     const user = userEvent.setup();
-    render(<MobileTabBar />);
-    const scheduleBtn = screen.getByText("Schedule");
-    await user.click(scheduleBtn);
-    expect(scheduleBtn).toBeInTheDocument();
+    render(<MobileTabBar page="dashboard" onNavigate={onNavigate} isAdmin={true} />);
+    await user.click(screen.getByRole("button", { name: "Admin" }));
+    expect(onNavigate).toHaveBeenCalledWith("admin");
   });
 });

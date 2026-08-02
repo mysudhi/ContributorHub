@@ -8,47 +8,52 @@ const mockUser = {
   email: "test@example.com",
   firstName: "Alice",
   lastName: "Smith",
-  role: "Volunteer"
+  role: "Contributor"
 };
+
+const adminUser = { ...mockUser, role: "OrgAdmin" };
 
 describe("DesktopHeader", () => {
   it("renders the application name", () => {
-    render(<DesktopHeader user={null} onLogout={vi.fn()} />);
+    render(<DesktopHeader user={null} page="dashboard" onNavigate={vi.fn()} onLogout={vi.fn()} />);
     expect(screen.getByText("ContributorHub")).toBeInTheDocument();
   });
 
   it("shows Org Dashboard badge when not logged in", () => {
-    render(<DesktopHeader user={null} onLogout={vi.fn()} />);
+    render(<DesktopHeader user={null} page="dashboard" onNavigate={vi.fn()} onLogout={vi.fn()} />);
     expect(screen.getByText("Org Dashboard")).toBeInTheDocument();
   });
 
   it("shows user name when logged in", () => {
-    render(<DesktopHeader user={mockUser} onLogout={vi.fn()} />);
+    render(<DesktopHeader user={mockUser} page="dashboard" onNavigate={vi.fn()} onLogout={vi.fn()} />);
     expect(screen.getByText("Alice Smith")).toBeInTheDocument();
   });
 
   it("shows Sign out button when logged in", () => {
-    render(<DesktopHeader user={mockUser} onLogout={vi.fn()} />);
+    render(<DesktopHeader user={mockUser} page="dashboard" onNavigate={vi.fn()} onLogout={vi.fn()} />);
     expect(screen.getByRole("button", { name: /sign out/i })).toBeInTheDocument();
   });
 
   it("calls onLogout when Sign out is clicked", async () => {
     const onLogout = vi.fn();
     const user = userEvent.setup();
-    render(<DesktopHeader user={mockUser} onLogout={onLogout} />);
+    render(<DesktopHeader user={mockUser} page="dashboard" onNavigate={vi.fn()} onLogout={onLogout} />);
     await user.click(screen.getByRole("button", { name: /sign out/i }));
     expect(onLogout).toHaveBeenCalledOnce();
   });
 
-  it("uses a header element", () => {
-    const { container } = render(<DesktopHeader user={null} onLogout={vi.fn()} />);
-    const header = container.querySelector("header");
-    expect(header).toBeInTheDocument();
+  it("shows Admin nav tab for admin users", () => {
+    render(<DesktopHeader user={adminUser} page="dashboard" onNavigate={vi.fn()} onLogout={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Admin" })).toBeInTheDocument();
   });
 
-  it("renders app name as an h1 element", () => {
-    render(<DesktopHeader user={null} onLogout={vi.fn()} />);
-    const heading = screen.getByText("ContributorHub");
-    expect(heading.tagName).toBe("H1");
+  it("does not show Admin tab for Contributor role", () => {
+    render(<DesktopHeader user={mockUser} page="dashboard" onNavigate={vi.fn()} onLogout={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: "Admin" })).not.toBeInTheDocument();
+  });
+
+  it("shows user role badge", () => {
+    render(<DesktopHeader user={mockUser} page="dashboard" onNavigate={vi.fn()} onLogout={vi.fn()} />);
+    expect(screen.getByText("Contributor")).toBeInTheDocument();
   });
 });

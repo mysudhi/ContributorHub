@@ -24,6 +24,18 @@ export function authRequired(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+export function adminRequired(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  if (req.user.role !== "SuperAdmin" && req.user.role !== "OrgAdmin") {
+    res.status(403).json({ error: "Admin access required" });
+    return;
+  }
+  next();
+}
+
 export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
   const header = req.header("authorization");
   if (header?.startsWith("Bearer ")) {

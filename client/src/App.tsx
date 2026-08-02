@@ -2,12 +2,20 @@ import { useState, useEffect } from "react";
 import { DesktopHeader } from "./components/layout/DesktopHeader";
 import { MobileTabBar } from "./components/layout/MobileTabBar";
 import { DashboardPage } from "./pages/DashboardPage";
+import { AdminDashboard } from "./pages/AdminDashboard";
 import { LoginPage, type AuthUser } from "./pages/LoginPage";
 
 export const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:4000";
 
+type Page = "dashboard" | "admin";
+
+function isAdmin(user: AuthUser) {
+  return user.role === "SuperAdmin" || user.role === "OrgAdmin";
+}
+
 export function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [page, setPage] = useState<Page>("dashboard");
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState("");
 
@@ -49,11 +57,13 @@ export function App() {
     localStorage.setItem("token", token);
     setUser(authUser);
     setAuthError("");
+    setPage(isAdmin(authUser) ? "admin" : "dashboard");
   }
 
   function handleLogout() {
     localStorage.removeItem("token");
     setUser(null);
+    setPage("dashboard");
   }
 
   if (loading) {
@@ -66,15 +76,17 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
-      <DesktopHeader user={user} onLogout={handleLogout} />
+      <DesktopHeader user={user} page={page} onNavigate={setPage} onLogout={handleLogout} />
       <main className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-        {user ? (
-          <DashboardPage user={user} />
-        ) : (
+        {!user ? (
           <LoginPage onLogin={handleLogin} initialError={authError} />
+        ) : page === "admin" && isAdmin(user) ? (
+          <AdminDashboard user={user} />
+        ) : (
+          <DashboardPage user={user} />
         )}
       </main>
-      {user && <MobileTabBar />}
+      {user && <MobileTabBar page={page} onNavigate={setPage} isAdmin={isAdmin(user)} />}
     </div>
   );
 }

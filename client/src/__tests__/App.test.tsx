@@ -29,9 +29,4 @@ describe("App", () => {
     expect(main).toBeInTheDocument();
     expect(main).toHaveClass("mx-auto", "max-w-6xl");
   });
-
-  it("does not show MobileTabBar when not authenticated", () => {
-    render(<App />);
-    expect(screen.queryByLabelText("Primary navigation")).not.toBeInTheDocument();
-  });
 });

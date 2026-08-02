@@ -278,6 +278,12 @@ All API endpoints require authentication via `Authorization: Bearer <token>` hea
 | GET | `/api/contributors/:id` | Get contributor with shifts and tasks |
 | PATCH | `/api/contributors/:id` | Update contributor profile or role |
 
+### Admin
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/admin/analytics` | Dashboard analytics (requires OrgAdmin/SuperAdmin role) |
+
 ---
 
 ## Key Design Decisions
@@ -313,7 +319,7 @@ Prisma provides a type-safe database client generated from the schema, making it
 - [x] Full CRUD API for shifts, tasks, and contributors
 - [x] Automated test suite (unit + integration + E2E)
 - [x] Contributor self-service shift signup
-- [ ] Admin dashboard with analytics
+- [x] Admin dashboard with analytics
 - [ ] Email notifications (shift reminders, assignments)
 - [ ] iCal calendar sync (import/export)
 - [ ] Skills matching and recommendations
