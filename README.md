@@ -329,6 +329,36 @@ Types and validation schemas live in `shared/` and are imported by both client a
 
 Prisma provides a type-safe database client generated from the schema, making it impossible to write queries that reference non-existent columns or tables. Migrations are version-controlled and reproducible.
 
+### Theme Customization (Planned)
+
+ContributorHub will support a multi-level theming system that gives organizations brand consistency while letting individual users personalize their experience.
+
+**Theme hierarchy** (highest priority wins):
+
+| Level | Set By | Scope | Examples |
+|-------|--------|-------|---------|
+| **Organization default** | OrgAdmin | All users in the organization | Brand colors, logo, font family |
+| **User preference** | Any signed-in user | The individual user's account | Light/dark mode, accent color, compact layout |
+| **Device-adaptive** | Automatic + user override | Per device (desktop, tablet, phone) | Font size, layout density, reduced motion |
+
+**Organization-level theming** — OrgAdmins can configure the default appearance for their organization:
+- Primary and accent colors
+- Logo and favicon
+- Font family
+- Default light or dark mode
+
+**Per-user theming** — After signing in, any user (Contributor, OrgAdmin, or SuperAdmin) can override the organization defaults:
+- Toggle between light mode, dark mode, or system-preferred
+- Choose an accent color
+- Select a compact or comfortable layout density
+- Preferences are saved to the user's profile and persist across sessions
+
+**Device-adaptive theming** — Theme settings can vary by device type:
+- Desktop, tablet, and mobile each store independent preferences
+- Users can choose different modes per device (e.g., dark mode on phone, light mode on desktop)
+- The system auto-detects the device type and applies the matching preferences
+- Respects OS-level accessibility settings (prefers-reduced-motion, prefers-contrast)
+
 ---
 
 ## Roadmap
@@ -341,7 +371,7 @@ Prisma provides a type-safe database client generated from the schema, making it
 - [x] Email notifications (shift reminders, assignments)
 - [ ] iCal calendar sync (import/export)
 - [ ] Skills matching and recommendations
-- [ ] Theme customization (organization branding, colors, fonts, dark mode)
+- [ ] Theme customization (organization defaults, per-user preferences, device-adaptive themes)
 - [ ] Mobile PWA support
 - [ ] API rate limiting and security hardening
 
