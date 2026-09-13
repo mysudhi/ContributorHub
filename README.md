@@ -341,6 +341,7 @@ Prisma provides a type-safe database client generated from the schema, making it
 - [x] Email notifications (shift reminders, assignments)
 - [ ] iCal calendar sync (import/export)
 - [ ] Skills matching and recommendations
+- [ ] Theme customization (organization branding, colors, fonts, dark mode)
 - [ ] Mobile PWA support
 - [ ] API rate limiting and security hardening
 
