@@ -17,7 +17,8 @@ This guide helps you resolve common issues when setting up and running the Contr
 7. [Frontend / Vite Issues](#7-frontend--vite-issues)
 8. [TypeScript Issues](#8-typescript-issues)
 9. [Git and Version Control Issues](#9-git-and-version-control-issues)
-10. [General Tips](#10-general-tips)
+10. [Email Notification Issues](#10-email-notification-issues)
+11. [General Tips](#11-general-tips)
 
 ---
 
@@ -886,7 +887,92 @@ Then re-run migrations to verify they apply cleanly.
 
 ---
 
-## 10. General Tips
+## 10. Email Notification Issues
+
+### Emails not being sent
+
+**Symptom:** No emails are received after shift signup, assignment, or reminders.
+
+**Fixes (all platforms):**
+
+1. Check if email is enabled: `SMTP_HOST` must be set.
+2. Verify status via API:
+   ```bash
+   curl -H "Authorization: Bearer <token>" http://localhost:4000/api/notifications/status
+   ```
+   If `emailEnabled` is `false`, the SMTP configuration is missing.
+
+3. Check server logs for `[Email]` messages — they indicate whether emails are sent or skipped.
+
+---
+
+### SMTP connection failed
+
+**Symptom:** Server logs show `[Email] Failed:` errors or SMTP verify returns `connected: false`.
+
+**Fixes (all platforms):**
+
+1. Verify SMTP credentials are correct.
+2. Test the connection via API (requires admin role):
+   ```bash
+   curl -H "Authorization: Bearer <token>" http://localhost:4000/api/notifications/verify
+   ```
+3. Common SMTP issues:
+   - **Gmail:** Use App Passwords (not your regular password). Enable "Less secure apps" or use OAuth2.
+   - **Port 465:** Set `SMTP_SECURE=true` for SSL connections.
+   - **Port 587:** Use `SMTP_SECURE=false` (default) — STARTTLS is handled automatically.
+   - **Firewall:** Ensure outbound connections on port 587/465 are allowed.
+
+---
+
+### Gmail-specific SMTP setup
+
+**Symptom:** Gmail blocks SMTP authentication.
+
+**Fix:**
+1. Go to https://myaccount.google.com/security
+2. Enable 2-Step Verification
+3. Generate an App Password: https://myaccount.google.com/apppasswords
+4. Use the generated password as `SMTP_PASS`:
+   ```env
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASS=your-16-char-app-password
+   ```
+
+---
+
+### Shift reminders not triggering
+
+**Symptom:** Contributors don't receive reminder emails before their shifts.
+
+**Fixes (all platforms):**
+
+1. The scheduler runs automatically when `SMTP_HOST` is configured. Check server logs for `[Scheduler]` messages.
+2. The scheduler checks every hour for shifts starting within the next 24 hours.
+3. To manually trigger reminders (admin only):
+   ```bash
+   curl -X POST -H "Authorization: Bearer <token>" http://localhost:4000/api/notifications/send-reminders
+   ```
+4. Ensure shifts have `OPEN` or `FILLED` status — `DRAFT` and `CANCELLED` shifts are excluded.
+
+---
+
+### Email appears in spam
+
+**Symptom:** Notification emails land in recipients' spam folders.
+
+**Fixes:**
+- Use a verified sending domain with proper SPF, DKIM, and DMARC records.
+- Set `SMTP_FROM` to match your authenticated domain.
+- Avoid using free email providers (Gmail, Yahoo) as the "from" address for bulk sending.
+- If using a transactional email service (SendGrid, Mailgun, Amazon SES), follow their domain verification guides.
+
+---
+
+## 11. General Tips
 
 ### How to completely reset the development environment
 

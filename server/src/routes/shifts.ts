@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db.js";
 import { authRequired } from "../middleware/auth.js";
+import { notifyShiftAssignment, notifyShiftSignupConfirmation, notifyShiftCancellation } from "../email/notification-service.js";
 
 export const shiftsRouter = Router();
 
@@ -142,6 +143,10 @@ shiftsRouter.patch("/:id", async (req, res) => {
       data
     });
 
+    if (body.status === "CANCELLED" && existing.status !== "CANCELLED") {
+      notifyShiftCancellation(req.params.id).catch(() => {});
+    }
+
     res.json({ shift });
   } catch (err) {
     if (err instanceof z.ZodError) {
@@ -204,6 +209,8 @@ shiftsRouter.post("/:id/contributors", async (req, res) => {
       include: { contributor: { select: { id: true, firstName: true, lastName: true, email: true } } }
     });
 
+    notifyShiftAssignment(req.params.id, userId).catch(() => {});
+
     res.status(201).json({ assignment: link });
   } catch (err) {
     console.error("Assign contributor error:", err);
@@ -264,6 +271,8 @@ shiftsRouter.post("/:id/signup", async (req, res) => {
         data: { status: "FILLED" }
       });
     }
+
+    notifyShiftSignupConfirmation(req.params.id, userId).catch(() => {});
 
     res.status(201).json({ signup: link });
   } catch (err) {

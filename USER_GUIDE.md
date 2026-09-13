@@ -23,6 +23,7 @@ Welcome to ContributorHub! This guide walks you through every screen and feature
    - [Tasks Within Shifts](#tasks-within-shifts)
    - [Skills and Matching](#skills-and-matching)
    - [Calendar Events](#calendar-events)
+   - [Email Notifications](#email-notifications)
 8. [Frequently Asked Questions](#frequently-asked-questions)
 
 ---
@@ -319,6 +320,44 @@ The calendar shows all-day events and timed events, making it easy to see your f
 
 ---
 
+### Email Notifications
+
+ContributorHub sends automated email notifications to keep contributors informed about their shifts and tasks.
+
+**Types of email notifications:**
+
+| Notification | When It's Sent | Who Receives It |
+|-------------|----------------|-----------------|
+| **Shift Assignment** | When an admin assigns you to a shift | The assigned contributor |
+| **Signup Confirmation** | When you sign up for a shift yourself | You (the person signing up) |
+| **Shift Reminder** | 24 hours before a shift starts | All contributors signed up for the shift |
+| **Shift Cancellation** | When an admin cancels a shift | All contributors who were signed up |
+| **Task Assignment** | When a task within a shift is assigned to you | The assigned contributor |
+
+**What's in the emails:**
+
+Each notification email includes:
+- The shift or task name
+- Date and time of the shift
+- Location (if specified)
+- A link to view the shift details in ContributorHub
+
+**Tips:**
+- Check your spam/junk folder if you're not receiving notification emails
+- Email notifications are optional — your organization admin controls whether they are enabled
+- You can always check your shifts in the ContributorHub app even without email notifications
+- Shift reminders are sent approximately 24 hours before a shift starts
+
+**For Admins:**
+
+To enable email notifications, configure SMTP settings in the server environment:
+1. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` environment variables
+2. The system automatically sends notifications when shifts are assigned, cancelled, or approaching
+3. Use the admin API endpoint `POST /api/notifications/send-reminders` to manually trigger reminders
+4. Check email service status at `GET /api/notifications/status`
+
+---
+
 ## Frequently Asked Questions
 
 ### General
@@ -363,6 +402,19 @@ A: Each shift card shows the location. Check the shift details for the full addr
 
 ---
 
+### Email Notifications
+
+**Q: I'm not receiving email notifications. What should I do?**
+A: Email notifications are optional and must be configured by your organization admin. If your admin has enabled email but you're not receiving messages, check your spam/junk folder. Also verify that the email address on your ContributorHub account is correct.
+
+**Q: Can I opt out of email notifications?**
+A: Currently, email notifications are sent to all contributors for their assigned shifts. Individual opt-out is on the roadmap. In the meantime, you can always check your schedule directly in the ContributorHub app.
+
+**Q: When do I get shift reminder emails?**
+A: Shift reminders are sent approximately 24 hours before a shift starts. You'll receive one reminder per upcoming shift.
+
+---
+
 ### For Admins
 
 **Q: How do I add contributors to my organization?**
@@ -373,6 +425,9 @@ A: Recurring shifts are on the roadmap. For now, create individual shifts for ea
 
 **Q: How do I customize my organization's branding?**
 A: Organization settings allow you to set a custom logo, primary color, and font family. These appear throughout the application for your contributors.
+
+**Q: How do I enable email notifications?**
+A: Configure SMTP settings in your server environment variables (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`). The system will automatically send notifications for shift assignments, signups, reminders, and cancellations. See the [Troubleshooting Guide](./TROUBLESHOOTING.md#10-email-notification-issues) for detailed setup instructions.
 
 ---
 
