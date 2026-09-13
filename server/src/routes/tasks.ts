@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db.js";
 import { authRequired } from "../middleware/auth.js";
+import { notifyTaskAssignment } from "../email/notification-service.js";
 
 export const tasksRouter = Router();
 
@@ -107,6 +108,10 @@ tasksRouter.post("/", async (req, res) => {
       }
     });
 
+    if (body.assignedContributorId) {
+      notifyTaskAssignment(task.id, body.assignedContributorId).catch(() => {});
+    }
+
     res.status(201).json({ task });
   } catch (err) {
     if (err instanceof z.ZodError) {
@@ -142,6 +147,10 @@ tasksRouter.patch("/:id", async (req, res) => {
       where: { id: req.params.id },
       data
     });
+
+    if (body.assignedContributorId && body.assignedContributorId !== existing.assignedContributorId) {
+      notifyTaskAssignment(task.id, body.assignedContributorId).catch(() => {});
+    }
 
     res.json({ task });
   } catch (err) {

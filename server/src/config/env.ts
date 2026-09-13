@@ -10,7 +10,13 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_CALLBACK_URL: z.string().url().optional(),
-  FRONTEND_URL: z.string().url().default("http://localhost:5173")
+  FRONTEND_URL: z.string().url().default("http://localhost:5173"),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z.string().default("false"),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().default("ContributorHub <noreply@contributorhub.org>"),
 });
 
 export const env = envSchema.parse(process.env);

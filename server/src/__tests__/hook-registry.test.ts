@@ -121,4 +121,36 @@ describe("HookRegistry", () => {
 
     expect(result).toBe("first-second");
   });
+
+  it("dispatches onShiftAssigned", async () => {
+    const registry = new HookRegistry();
+    const handler = vi.fn();
+    registry.register("onShiftAssigned", handler);
+    await registry.dispatch("onShiftAssigned", { shiftId: "s1", userId: "u1" });
+    expect(handler).toHaveBeenCalledWith({ shiftId: "s1", userId: "u1" });
+  });
+
+  it("dispatches onShiftCancelled", async () => {
+    const registry = new HookRegistry();
+    const handler = vi.fn();
+    registry.register("onShiftCancelled", handler);
+    await registry.dispatch("onShiftCancelled", { shiftId: "s1" });
+    expect(handler).toHaveBeenCalledWith({ shiftId: "s1" });
+  });
+
+  it("dispatches onTaskAssigned", async () => {
+    const registry = new HookRegistry();
+    const handler = vi.fn();
+    registry.register("onTaskAssigned", handler);
+    await registry.dispatch("onTaskAssigned", { taskId: "t1", userId: "u1" });
+    expect(handler).toHaveBeenCalledWith({ taskId: "t1", userId: "u1" });
+  });
+
+  it("dispatches onShiftSignup", async () => {
+    const registry = new HookRegistry();
+    const handler = vi.fn();
+    registry.register("onShiftSignup", handler);
+    await registry.dispatch("onShiftSignup", { shiftId: "s1", userId: "u1" });
+    expect(handler).toHaveBeenCalledWith({ shiftId: "s1", userId: "u1" });
+  });
 });

@@ -130,9 +130,10 @@ The database schema includes the following entities:
 │   ├── src/
 │   │   ├── config/         # Environment validation
 │   │   ├── auth/           # Password hashing, JWT, Google OAuth
+│   │   ├── email/          # Email service, templates, notifications, scheduler
 │   │   ├── middleware/     # Tenant context, auth guards
 │   │   ├── plugins/        # Hook registry for extensibility
-│   │   ├── routes/         # API route handlers (auth, shifts, tasks, contributors)
+│   │   ├── routes/         # API route handlers (auth, shifts, tasks, contributors, notifications)
 │   │   ├── app.ts          # Express app factory
 │   │   └── index.ts        # Server entry point
 │   └── package.json
@@ -184,6 +185,14 @@ DATABASE_URL="postgresql://contributorhub:contributorhub@localhost:5432/contribu
 DIRECT_URL="postgresql://contributorhub:contributorhub@localhost:5432/contributorhub"
 NODE_ENV="development"
 PORT=4000
+
+# Email notifications (optional — omit SMTP_HOST to disable)
+# SMTP_HOST="smtp.example.com"
+# SMTP_PORT=587
+# SMTP_SECURE=false
+# SMTP_USER="your-email@example.com"
+# SMTP_PASS="your-app-password"
+# SMTP_FROM="ContributorHub <noreply@yourdomain.com>"
 ```
 
 ### 4. Generate Prisma client and run migrations
@@ -284,6 +293,14 @@ All API endpoints require authentication via `Authorization: Bearer <token>` hea
 |--------|----------|-------------|
 | GET | `/api/admin/analytics` | Dashboard analytics (requires OrgAdmin/SuperAdmin role) |
 
+### Notifications
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notifications/status` | Check email service and scheduler status |
+| GET | `/api/notifications/verify` | Verify SMTP connection (admin only) |
+| POST | `/api/notifications/send-reminders` | Manually trigger shift reminders (admin only) |
+
 ---
 
 ## Key Design Decisions
@@ -294,8 +311,9 @@ Tenant isolation is achieved through the `x-org-id` HTTP header. The `tenantCont
 
 ### Plugin Hook System
 
-The `HookRegistry` class provides an event-driven extensibility mechanism. Code can register handlers for lifecycle events (e.g., `onShiftCreated`, `onContributorApplied`) without coupling to core logic. This enables features like:
-- Email/SMS notifications
+The `HookRegistry` class provides an event-driven extensibility mechanism. Code can register handlers for lifecycle events (e.g., `onShiftCreated`, `onContributorApplied`, `onShiftAssigned`, `onShiftCancelled`, `onTaskAssigned`, `onShiftSignup`) without coupling to core logic. This enables features like:
+- Email notifications (built-in — shift assignments, signup confirmations, reminders, cancellations)
+- SMS notifications
 - Slack/Discord integrations
 - Audit logging
 - Analytics tracking
@@ -320,7 +338,7 @@ Prisma provides a type-safe database client generated from the schema, making it
 - [x] Automated test suite (unit + integration + E2E)
 - [x] Contributor self-service shift signup
 - [x] Admin dashboard with analytics
-- [ ] Email notifications (shift reminders, assignments)
+- [x] Email notifications (shift reminders, assignments)
 - [ ] iCal calendar sync (import/export)
 - [ ] Skills matching and recommendations
 - [ ] Mobile PWA support

@@ -370,6 +370,14 @@ The server container accepts these environment variables:
 | `DB_USER` | Yes | — | PostgreSQL username (for health check) |
 | `NODE_ENV` | No | `production` | Node.js environment |
 | `PORT` | No | `4000` | API server port |
+| `JWT_SECRET` | No | `dev-secret-...` | Secret key for JWT token signing |
+| `FRONTEND_URL` | No | `http://localhost:5173` | Frontend URL for OAuth redirects |
+| `SMTP_HOST` | No | — | SMTP server hostname (enables email notifications) |
+| `SMTP_PORT` | No | `587` | SMTP server port |
+| `SMTP_SECURE` | No | `false` | Use SSL/TLS for SMTP connection |
+| `SMTP_USER` | No | — | SMTP authentication username |
+| `SMTP_PASS` | No | — | SMTP authentication password |
+| `SMTP_FROM` | No | `ContributorHub <noreply@contributorhub.org>` | Sender address for notification emails |
 
 ### Customizing ports
 

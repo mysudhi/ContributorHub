@@ -34,6 +34,7 @@ The server exposes a full CRUD API under `/api`:
 - `/api/shifts/*` — CRUD for shifts + contributor assignment (requires auth + `x-org-id`)
 - `/api/tasks/*` — CRUD for tasks within shifts (requires auth + `x-org-id` for create)
 - `/api/contributors/*` — list, get, update contributors (requires auth)
+- `/api/notifications/*` — email notification status, SMTP verification, manual reminders (requires auth; admin for write ops)
 
 All CRUD routes require a `Bearer` token. Shift/task creation requires the `x-org-id` header for multi-tenancy.
 
@@ -49,7 +50,7 @@ All CRUD routes require a `Bearer` token. Shift/task creation requires the `x-or
 ### Lint / Test / Build
 
 - `npm run lint` — stubs only (echoes "not configured yet" in all workspaces)
-- `npm run test` — Vitest tests across all 3 workspaces (118+ tests)
+- `npm run test` — Vitest tests across all 3 workspaces (168+ tests)
 - `npm run test:e2e` — Playwright E2E tests
 - `npm run build` — client and server succeed; shared fails due to missing `.js` extensions in imports (pre-existing issue)
 

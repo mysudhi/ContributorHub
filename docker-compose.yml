@@ -33,6 +33,12 @@ services:
       PORT: "4000"
       JWT_SECRET: change-this-in-production
       FRONTEND_URL: http://localhost:3000
+      # SMTP_HOST: smtp.example.com
+      # SMTP_PORT: "587"
+      # SMTP_SECURE: "false"
+      # SMTP_USER: ""
+      # SMTP_PASS: ""
+      # SMTP_FROM: "ContributorHub <noreply@yourdomain.com>"
     ports:
       - "4000:4000"
     depends_on:
