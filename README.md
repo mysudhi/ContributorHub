@@ -372,6 +372,7 @@ ContributorHub will support a multi-level theming system that gives organization
 - [ ] iCal calendar sync (import/export)
 - [ ] Skills matching and recommendations
 - [ ] Theme customization (organization defaults, per-user preferences, device-adaptive themes)
+- [ ] In-app messaging (direct messages between users, group/shift chat, admin announcements)
 - [ ] Mobile PWA support
 - [ ] API rate limiting and security hardening
 
